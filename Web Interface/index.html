@@ -1,0 +1,244 @@
+<html>
+<head>
+	<title>Word-Copy Speed</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="http://momentjs.com/downloads/moment.js"></script>
+	<style>
+		#spanWord {
+			font-size:20pt;
+		}
+		#txtType {
+			border:none;
+			font-size:20pt;
+		}
+		#turkCode {
+			border:none;
+			font-size:16pt;
+		}
+		body {
+			font-family:arial;
+			width:100%;
+		}
+		#instructions {
+		}
+		p, h1, div {
+    		margin-left: auto;
+    		margin-right: auto;
+    		width:600px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<h1>Word-Copy Speed</h1>
+
+	<p id="instructions">Typing requires prompt reaction and execution of each key. How quick is your reaction, and how fast your typing? When you are ready to type, click the button below and set your hands comfortably on the keys. A countdown from 5 seconds will signal the start of your typing test. Each typing test will present about 70 sequences of letters to copy.</p>
+
+	<p><input type=button value="Begin!" id=btnStart></p>
+
+	<p>
+		<div id="spanWord"><em>&larr; Letters to type back will appear here...</em></div>
+		<div><input type=text size=50 id="txtType"></div>
+		<div><p id="txtDebriefing" style="display:none;"></p></div>
+		<div><input type=text size=50 id="turkCode" style="display:none;"></div>
+	</p>
+
+	<script>
+		var amtVal = getRandomInt(10000,20000);
+
+		curStim = 0;
+		practice = ["pondering","shearling","thund","imperat","positives","negate","governmental"];
+		stimArrayA = ["mesmer","deodorize","frenetical","rudime","exponent","monastical","patric","dexterous","gutturally","cortic","consonant","pulverizer","retice","cauterize","exuberances","incess","indignant","erroneously","squand","dalmatian","flounders","nutrit","custodian","cannibalize","frivol","adjacent","reluctantly","vertic","cardinal","receptionist","incide","minister","innocently","reject","strident","ironically","mammal","tenderize","meteorical","concur","repentant","cancerously","expect","lecherous","thrusters","margin","absorbant","clerically","rhythm","coherent","malignantly","patron","hazardous","tropically","intuit","selection","regimental","ration","appearance","marvelously","arrest","resister","rewardingly","clinic","genderize","powderized"];
+		stimArrayB = ["mesmerize","deodorizer","frenet","rudiment","exponential","monast","patrician","dexterously","guttur","cortical","consonants","pulver","reticent","cauterized","exuber","incessant","indignantly","errone","squander","dalmatians","flound","nutrition","custodians","cannib","frivolous","adjacently","reluct","vertical","cardinalize","recept","incident","ministers","innoce","rejection","stridently","ironic","mammalian","tenderizer","meteor","concurrent","repentantly","cancer","expectant","lecherously","thrust","marginal","absorbantly","cleric","rhythmic","coherently","malign","patronize","hazardously","tropic","intuition","selectionist","regime","rational","appearances","marvel","arrester","resisters","reward","clinician","genderized","powder"];
+		stimArrayC = ["mesmerized","deodor","frenetic","rudimental","expone","monastic","patricians","dexter","guttural","cortically","conson","pulverize","reticently","cauter","exuberance","incessantly","indign","erroneous","squanders","dalmat","flounder","nutritionist","custod","cannibal","frivolously","adjace","reluctant","vertically","cardin","reception","incidental","minist","innocent","rejectionist","stride","ironical","mammalians","tender","meteoric","concurrently","repent","cancerous","expectantly","lecher","thruster","marginalize","absorb","clerical","rhythmical","cohere","malignant","patronizer","hazard","tropical","intuitionist","select","regiment","rationalize","appear","marvelous","arresters","resist","rewarding","clinicians","gender","powderize"];
+
+		function shuffle(array) {
+		  var currentIndex = array.length, temporaryValue, randomIndex;
+
+		  // While there remain elements to shuffle...
+		  while (0 !== currentIndex) {
+
+		    // Pick a remaining element...
+		    randomIndex = Math.floor(Math.random() * currentIndex);
+		    currentIndex -= 1;
+
+		    // And swap it with the current element.
+		    temporaryValue = array[currentIndex];
+		    array[currentIndex] = array[randomIndex];
+		    array[randomIndex] = temporaryValue;
+		  }
+
+		  return array;
+		}
+
+		r = Math.random();
+		if (r<=.33) {
+			stimArray = practice.concat(shuffle(stimArrayA));
+			stimList = 'A';
+		} else if (r < .67) {
+			stimArray = practice.concat(shuffle(stimArrayB));
+			stimList = 'B';
+		} else {
+			stimArray = practice.concat(shuffle(stimArrayC));
+			stimList = 'C';
+		}
+
+		checkForErrors = 0;
+		nErrors = 0;
+		innerWord = 0;
+		startWord = 0;
+		typedWord = '';
+		rtStart = 0;
+
+		$("#txtType").prop('disabled', true);
+
+		$("#btnStart").click(function() {
+			$("#txtType").val("5");
+			$("#btnStart").prop('disabled',true);
+			countDown(5);
+		})
+
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+		// Returns a random integer between min (included) and max (excluded)
+		// Using Math.round() will give you a non-uniform distribution!
+		function getRandomInt(min, max) {
+		  min = Math.ceil(min);
+		  max = Math.floor(max);
+		  return Math.floor(Math.random() * (max - min)) + min;
+		}
+
+		function countDown(x) {
+			setTimeout(function() {
+				if (x-1>0) {
+					if (x>1) { countDown(x-1); }
+					$("#txtType").val(x-1);
+				}
+				else {
+					$("#txtType").val("");
+					makeLogBox("txtType");
+					showStimulus();
+				}
+			},1000);
+		}
+
+		var audio = new Audio('beep.wav');
+
+		function playSound() {
+			//audio.play();
+		}
+
+		function showStimulus() {
+			if (curStim<stimArray.length) {
+				$("#txtType").prop('disabled', false);
+				rtStart = performance.now();
+				$("#txtType").css("width",stimArray[curStim].length*17);
+				$("#txtType").focus();
+				$("#spanWord").html(stimArray[curStim]);
+				curStim  = curStim + 1;
+				checkForErrors = 1;
+				stimNotes = '';
+			}	
+			else {
+				$("#spanWord").html("Word list complete.");
+				avgS = (innerWord/(stimArray.length-nErrors));
+				//speedDisplay = Math.round(60 / avgS);
+				speedDisplay = avgS;
+				RTDisplay = startWord / (stimArray.length-nErrors);
+				makeFinishBox();
+				$("#txtType").css("width","700px");
+				$("#txtType").css("font-size","13pt");
+				debriefing = "In this study, we are exploring how people process language by measuring the finer-grained aspects of how they type back words. We measured your typing speed at the millisecond level. In case you are interested, here are some quick stats. Reaction time is how quickly you <em>began</em> typing the words that you saw. Typing speed is the average overall typing of the words. You can refresh this webpage if you want to try again, but you will only get compensated for one HIT. Thanks kindly for your participation! ";
+				//$("#txtType").val(debriefing+" Reaction time: "+Math.round(RTDisplay)/1000+" secs. Typing speed: "+Math.round(speedDisplay)/1000+" secs / key.");
+				$("#txtDebriefing").html(debriefing+" <b>Reaction time</b>: "+Math.round(RTDisplay)/1000+" secs. <b>Typing speed</b>: "+Math.round(speedDisplay)/1000+" secs / key.");
+				$("#txtDebriefing").css("display","inline");
+				$("#turkCode").val("Your code for AMT is: "+amtVal);
+				$("#turkCode").css("display","inline");
+			}
+		}
+
+		function customFunction(event) {
+			console.log(keysClean);
+			console.log(rtsAll);
+			if (event.charCode!=13) {
+				stimHere = $("#spanWord").html().substring(0,$("#txtType").val().length+1);
+			}
+			if (event.charCode!=13) {			
+				////// error in typing
+				if (stimHere!=$("#txtType").val()+event.key & checkForErrors) {
+					checkForErrors = 0;
+					typedWord = $("#txtType").val()+event.key;
+					$("#spanWord").html("<font color=red>Error.</font>");
+					// $("#txtType").val("");
+					nErrors = nErrors + 1;
+					stimNotes = 'error;'+stimList+';'+amtVal+';'+stimArray[curStim-1];
+					sendData(saveData());
+					resetArrays();
+					blankOut(event.key);
+					setTimeout(playSound,800);
+					setTimeout(showStimulus,1500);
+				}
+			}	
+			if (event.charCode==13) {
+				// they made it to enter key, so correct...
+				checkForErrors = 0;
+				typedWord = $("#txtType").val();
+				// $("#txtType").val("");
+				innerWord = innerWord + (rtsClean[rtsClean.length-1]-rtsClean[0])/(rtsClean.length-1);
+				startWord = startWord + rtsAll[0];
+				stimNotes = 'correct;'+stimList+';'+amtVal+';'+stimArray[curStim-1];
+				sendData(saveData());
+
+				$("#spanWord").html("...");
+				setTimeout(playSound,800);
+				setTimeout(showStimulus,1500);
+				resetArrays();
+				blankOut('');
+			}
+			////// stimulus completed successfully // prior version not capturing overtyping
+			/*else if (stimHere==stimArray[curStim-1] & checkForErrors) {
+				checkForErrors = 0;
+				typedWord = $("#txtType").val()+event.key;
+				// $("#txtType").val("");
+				innerWord = innerWord + (rtsClean[rtsClean.length-1]-rtsClean[0])/(rtsClean.length-1);
+				startWord = startWord + rtsAll[0];
+				stimNotes = 'correct;'+stimList+';'+amtVal+';'+stimArray[curStim-1];
+				sendData(saveData());
+			}
+			else if (event.charCode==13 & !checkForErrors) {
+				$("#spanWord").html("...");
+				setTimeout(playSound,800);
+				setTimeout(showStimulus,1500);
+				resetArrays();
+				blankOut('');
+			}*/
+
+		}
+
+		function blankOut(k) {
+			$("#txtType").val($("#txtType").val()+k);
+			$("#txtType").prop('disabled', true);
+			setTimeout(function() {
+				$("#txtType").val("");
+			},500);
+		}
+		function resetArrays() {
+			keysClean = [];
+			rtsClean = [];
+			charsClean = [];
+
+			keysAll = [];
+			rtsAll = [];
+			charsAll = [];
+		}
+
+		function makeFinishBox() {
+			$("#txtType").css("color","green");
+			$("#txtType").css("font-weight","bold");
+		}
+
+	</script>
+	<script src="dynamic-keys.js"></script>
+
+</body>
+</html>
